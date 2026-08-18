@@ -1,0 +1,58 @@
+services:
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+    volumes:
+      - ./prowlarr/config:/config
+    ports:
+      - "127.0.0.1:9696:9696/tcp"
+    networks:
+      - default
+      - vpn-network
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+    volumes:
+      - ./sonarr/config:/config
+      - ${HOME}/Downloads/torrents:/downloads
+      - ${HOME}/media/tv:/tv
+    ports:
+      - "127.0.0.1:8989:8989/tcp"
+    networks:
+      - default
+      - vpn-network
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+    volumes:
+      - ./radarr/config:/config
+      - ${HOME}/Downloads/torrents:/downloads
+      - ${HOME}/media/movies:/movies
+    ports:
+      - "127.0.0.1:7878:7878/tcp"
+    networks:
+      - default
+      - vpn-network
+
+networks:
+  default:
+  vpn-network:
+    external: true
+    name: deluge-vpn_default

@@ -1,0 +1,17 @@
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - ${HOME}/Downloads/torrents:/data/torrents
+    ports:
+      - "8096:8096/tcp"   # web UI / streaming
+      - "7359:7359/udp"   # client auto-discovery
+      - "1900:1900/udp"   # DLNA discovery

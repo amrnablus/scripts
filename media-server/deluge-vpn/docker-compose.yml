@@ -1,0 +1,40 @@
+services:
+  gluetun:
+    image: ghcr.io/qdm12/gluetun:latest
+    container_name: gluetun
+    hostname: gluetun
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - ./gluetun:/gluetun
+      - ./gluetun-tmp:/tmp/gluetun
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - VPN_PORT_FORWARDING=on
+      - TZ=${TZ}
+    ports:
+      - "127.0.0.1:8113:8112/tcp"
+
+  deluge:
+    image: lscr.io/linuxserver/deluge:amd64-latest
+    container_name: deluge
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - DELUGE_PASSWORD=${DELUGE_PASSWORD}
+    volumes:
+      - ./deluge_config:/config
+      - ${HOME}/Downloads/torrents:/downloads
+      - ./scripts:/custom-cont-init.d:ro
+      - ./gluetun-tmp:/gluetun:ro
